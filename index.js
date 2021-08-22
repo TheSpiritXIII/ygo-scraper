@@ -219,10 +219,19 @@ async function extractCardDetails(page, link) {
 	const category = await extractVerticalTableHeaderContent(page, "Card type");
 	const attribute = await extractVerticalTableHeaderContent(page, "Attribute");
 	const types = (await extractVerticalTableHeaderContent(page, "Types"))?.split("/").map((x) => x.trim());
+	const monster_type = types?.[0];
+	types?.shift();
+	const monster_card_types = types;
+
 	const level = await extractVerticalTableHeaderContent(page, "Level");
+	const rank = await extractVerticalTableHeaderContent(page, "Rank");
 	const attackDefensePair = (await extractVerticalTableHeaderContent(page, "ATK / DEF"))?.split("/").map((x) => x.trim());
-	const attack = attackDefensePair?.[0];
+	const attackLinkPair = (await extractVerticalTableHeaderContent(page, "ATK / LINK"))?.split("/").map((x) => x.trim());
+	const attack = attackDefensePair?.[0] || attackLinkPair?.[0];
 	const defense = attackDefensePair?.[1];
+	const link_rating = attackLinkPair?.[1];
+	const link_arrows = await extractVerticalTableHeaderContent(page, "Link Arrows");
+	const pendulum_scale = await extractVerticalTableHeaderContent(page, "Pendulum Scale");
 	const password = await extractVerticalTableHeaderContent(page, "Password");
 	const property = await extractVerticalTableHeaderContent(page, "Property");
 
@@ -236,8 +245,13 @@ async function extractCardDetails(page, link) {
 		description,
 		category,
 		attribute,
-		types,
+		monster_type,
+		monster_card_types,
 		level,
+		rank,
+		link_rating,
+		link_arrows,
+		pendulum_scale,
 		attack,
 		defense,
 		password,
