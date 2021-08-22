@@ -1,0 +1,12 @@
+{
+	"name": "ygoscrap",
+	"version": "1.0.0",
+	"description": "Scrap yugiohpedia",
+	"main": "index.js",
+	"scripts": {
+		"start": "node index.js"
+	},
+	"dependencies": {
+		"puppeteer": "^10.2.0"
+	}
+}
