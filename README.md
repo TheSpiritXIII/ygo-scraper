@@ -1,5 +1,7 @@
-# ygoscrap
+# ygo-scraper
 This project scraps Yugipedia for card information using Puppeteer.
+
+Live demo at: https://thespiritxiii.github.io/ygo-scraper/
 
 This project makes use of a card list cache file and a card detail cache file to avoid unnecessary scrapping. As such, you may edit `index.js` to control scrapping behavior:
 1. `SHOULD_UPDATE_LIST` - flag to control whether to scrap the card list.
