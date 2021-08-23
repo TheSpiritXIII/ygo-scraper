@@ -28,7 +28,7 @@ async function updateCardList(page) {
 			return JSON.parse(fileContent);
 		} catch (error) {
 			// This is fine, we will scrap instead.
-			console.error(`Got an error trying to read file ${LIST_FILE_NAME}: ${error.message}`);
+			console.error(`Got an error trying to read file ${LIST_FILE_NAME}:`, error);
 		}
 	}
 
@@ -41,7 +41,7 @@ async function updateCardList(page) {
 		console.log("Output file:", LIST_FILE_NAME);
 	} catch (error) {
 		// This is not fine -- unrecoverable.
-		console.error(`Got an error trying to write to file ${LIST_FILE_NAME}: ${error.message}`);
+		console.error(`Got an error trying to write to file ${LIST_FILE_NAME}:`, error);
 		throw error;
 	}
 	return cardList;
@@ -129,8 +129,8 @@ async function updateCardDetails(page, cardList) {
 			let shouldUpdate = true;
 			try {
 				shouldUpdate = shouldUpdateCardDetails(details);
-			} catch (e) {
-				console.error(`Caught exception trying to determine update criteria: ${error.message}`);
+			} catch (error) {
+				console.error("Caught exception trying to determine update criteria:", error);
 			}
 			if (!shouldUpdate) {
 				cardScrapSet.delete(details.link);
@@ -139,7 +139,7 @@ async function updateCardDetails(page, cardList) {
 		});
 	} catch (error) {
 		// This is fine, we will scrap instead.
-		console.error(`Got an error trying to read file ${DETAILS_FILE_NAME}: ${error.message}`);
+		console.error(`Got an error trying to read file ${DETAILS_FILE_NAME}:`, error);
 	}
 
 	if (cardScrapSet.size == 0) {
@@ -154,7 +154,7 @@ async function updateCardDetails(page, cardList) {
 			detailsList.push(details);
 		}
 	} catch (error) {
-		console.error(`Caught error trying to extract card details: ${error.message}`);
+		console.error("Caught error trying to extract card details:", error);
 	}
 
 	await saveCardDetails(detailsList);
@@ -178,7 +178,7 @@ async function saveCardDetails(detailsList) {
 		console.log("Output file:", DETAILS_FILE_NAME);
 	} catch (error) {
 		// This is not fine -- unrecoverable.
-		console.error(`Got an error trying to write to file ${DETAILS_FILE_NAME}: ${error.message}`);
+		console.error(`Got an error trying to write to file ${DETAILS_FILE_NAME}:`, error);
 		throw error;
 	}
 
@@ -191,7 +191,7 @@ async function saveCardDetails(detailsList) {
 function shouldUpdateCardDetails(details) {
 	// Return true to force re-scrap.
 	// You can add logic, e.g. if you add a new field to be scrapped and if it doesn't exist in cache, then re-scrap.
-	return false;
+	return details.category == "Monster" && !details.monster_type;
 }
 
 function asInt(number) {
@@ -227,9 +227,16 @@ async function extractCardDetails(page, link) {
 	const category = await extractVerticalTableHeaderContent(page, "Card type");
 	const attribute = await extractVerticalTableHeaderContent(page, "Attribute");
 	const types = (await extractVerticalTableHeaderContent(page, "Types"))?.split("/").map((x) => x.trim());
-	const monster_type = types?.[0];
-	types?.shift();
-	const monster_card_types = types;
+	let monster_type;
+	let monster_card_types;
+	if (types != null) {
+		monster_type = types?.[0];
+		types?.shift();
+		monster_card_types = types;
+	} else {
+		monster_type = await extractVerticalTableHeaderContent(page, "Type");
+		monster_card_types = ["Normal"];
+	}
 
 	const level = asInt(await extractVerticalTableHeaderContent(page, "Level"));
 	const rank = asInt(await extractVerticalTableHeaderContent(page, "Rank"));
@@ -238,7 +245,7 @@ async function extractCardDetails(page, link) {
 	const attack = asInt(attackDefensePair?.[0] || attackLinkPair?.[0]);
 	const defense = asInt(attackDefensePair?.[1]);
 	const link_rating = asInt(attackLinkPair?.[1]);
-	const link_arrows = await extractVerticalTableHeaderContent(page, "Link Arrows")?.split(",").map((x) => x.trim());
+	const link_arrows = (await extractVerticalTableHeaderContent(page, "Link Arrows"))?.split(",").map((x) => x.trim());
 	const pendulum_scale = asInt(await extractVerticalTableHeaderContent(page, "Pendulum Scale"));
 	const password = await extractVerticalTableHeaderContent(page, "Password");
 	const property = await extractVerticalTableHeaderContent(page, "Property");
