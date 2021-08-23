@@ -157,6 +157,10 @@ async function updateCardDetails(page, cardList) {
 		console.error(`Caught error trying to extract card details: ${error.message}`);
 	}
 
+	await saveCardDetails(detailsList);
+}
+
+async function saveCardDetails(detailsList) {
 	detailsList.sort((left, right) => {
 		var nameLeft = left.name;
 		var nameRight = right.name;
@@ -188,6 +192,10 @@ function shouldUpdateCardDetails(details) {
 	// Return true to force re-scrap.
 	// You can add logic, e.g. if you add a new field to be scrapped and if it doesn't exist in cache, then re-scrap.
 	return false;
+}
+
+function asInt(number) {
+	return number != null ? Number.parseInt(number) : undefined;
 }
 
 async function extractCardDetails(page, link) {
@@ -223,15 +231,15 @@ async function extractCardDetails(page, link) {
 	types?.shift();
 	const monster_card_types = types;
 
-	const level = await extractVerticalTableHeaderContent(page, "Level");
-	const rank = await extractVerticalTableHeaderContent(page, "Rank");
+	const level = asInt(await extractVerticalTableHeaderContent(page, "Level"));
+	const rank = asInt(await extractVerticalTableHeaderContent(page, "Rank"));
 	const attackDefensePair = (await extractVerticalTableHeaderContent(page, "ATK / DEF"))?.split("/").map((x) => x.trim());
 	const attackLinkPair = (await extractVerticalTableHeaderContent(page, "ATK / LINK"))?.split("/").map((x) => x.trim());
-	const attack = attackDefensePair?.[0] || attackLinkPair?.[0];
-	const defense = attackDefensePair?.[1];
-	const link_rating = attackLinkPair?.[1];
-	const link_arrows = await extractVerticalTableHeaderContent(page, "Link Arrows");
-	const pendulum_scale = await extractVerticalTableHeaderContent(page, "Pendulum Scale");
+	const attack = asInt(attackDefensePair?.[0] || attackLinkPair?.[0]);
+	const defense = asInt(attackDefensePair?.[1]);
+	const link_rating = asInt(attackLinkPair?.[1]);
+	const link_arrows = await extractVerticalTableHeaderContent(page, "Link Arrows")?.split(",").map((x) => x.trim());
+	const pendulum_scale = asInt(await extractVerticalTableHeaderContent(page, "Pendulum Scale"));
 	const password = await extractVerticalTableHeaderContent(page, "Password");
 	const property = await extractVerticalTableHeaderContent(page, "Property");
 

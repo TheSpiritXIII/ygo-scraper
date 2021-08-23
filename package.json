@@ -1,7 +1,7 @@
 {
-	"name": "ygoscrap",
+	"name": "ygo-scraper",
 	"version": "1.0.0",
-	"description": "Scrap yugiohpedia",
+	"description": "Scrap Yugiohpedia",
 	"main": "index.js",
 	"scripts": {
 		"start": "node index.js"
